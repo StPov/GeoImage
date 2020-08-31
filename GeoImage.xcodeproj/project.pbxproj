@@ -13,7 +13,18 @@
 		8589C85424FCC4F200283C70 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8589C85224FCC4F200283C70 /* Main.storyboard */; };
 		8589C85624FCC4F400283C70 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8589C85524FCC4F400283C70 /* Assets.xcassets */; };
 		8589C85924FCC4F400283C70 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8589C85724FCC4F400283C70 /* LaunchScreen.storyboard */; };
+		8589C86124FCC54C00283C70 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8589C86024FCC54C00283C70 /* ImagePicker.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8589C8DE24FD23DC00283C70 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8589C8DA24FD23DB00283C70 /* iphoneExif.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = AF1F78C40E0A7F030023CDE4;
+			remoteInfo = exifLib;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		8589C84924FCC4F200283C70 /* GeoImage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GeoImage.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -24,6 +35,8 @@
 		8589C85524FCC4F400283C70 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8589C85824FCC4F400283C70 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8589C85A24FCC4F400283C70 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8589C86024FCC54C00283C70 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		8589C8DA24FD23DB00283C70 /* iphoneExif.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = iphoneExif.xcodeproj; path = "../../../Downloads/iphone-exif/trunk/iphoneExif.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,8 +76,18 @@
 				8589C85524FCC4F400283C70 /* Assets.xcassets */,
 				8589C85724FCC4F400283C70 /* LaunchScreen.storyboard */,
 				8589C85A24FCC4F400283C70 /* Info.plist */,
+				8589C86024FCC54C00283C70 /* ImagePicker.swift */,
+				8589C8DA24FD23DB00283C70 /* iphoneExif.xcodeproj */,
 			);
 			path = GeoImage;
+			sourceTree = "<group>";
+		};
+		8589C8DB24FD23DB00283C70 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8589C8DF24FD23DC00283C70 /* libiphone-exif.a */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -113,12 +136,28 @@
 			mainGroup = 8589C84024FCC4F200283C70;
 			productRefGroup = 8589C84A24FCC4F200283C70 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 8589C8DB24FD23DB00283C70 /* Products */;
+					ProjectRef = 8589C8DA24FD23DB00283C70 /* iphoneExif.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				8589C84824FCC4F200283C70 /* GeoImage */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		8589C8DF24FD23DC00283C70 /* libiphone-exif.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libiphone-exif.a";
+			remoteRef = 8589C8DE24FD23DC00283C70 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8589C84724FCC4F200283C70 /* Resources */ = {
@@ -139,6 +178,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8589C85124FCC4F200283C70 /* ViewController.swift in Sources */,
+				8589C86124FCC54C00283C70 /* ImagePicker.swift in Sources */,
 				8589C84D24FCC4F200283C70 /* AppDelegate.swift in Sources */,
 				8589C84F24FCC4F200283C70 /* SceneDelegate.swift in Sources */,
 			);

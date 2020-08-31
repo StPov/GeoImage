@@ -60,5 +60,17 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>This app wants to take pictures.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app wants to use your photos.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Allow to get your current location</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Allow to get your current location</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Allow to get your current location</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Please allow access to save photo in your photo library</string>
 </dict>
 </plist>
