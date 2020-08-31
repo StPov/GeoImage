@@ -12,7 +12,7 @@ import AssetsLibrary
 import CoreLocation
 
 public protocol ImagePickerDelegate: class {
-    func didSelect(image: UIImage?)
+    func didSelect(image: UIImage?, location: CLLocation?, locationName: String?)
 }
 
 open class ImagePicker: NSObject {
@@ -21,6 +21,8 @@ open class ImagePicker: NSObject {
     private weak var presentationController: UIViewController?
     private weak var delegate: ImagePickerDelegate?
     var locationManager = CLLocationManager()
+    var location: CLLocation?
+    var locationName: String?
 
     public init(presentationController: UIViewController, delegate: ImagePickerDelegate) {
         self.pickerController = UIImagePickerController()
@@ -71,131 +73,73 @@ open class ImagePicker: NSObject {
 
         self.presentationController?.present(alertController, animated: true)
     }
-
-    private func pickerController(_ controller: UIImagePickerController, didSelect image: UIImage?) {
+    
+    private func pickerController(_ controller: UIImagePickerController, didSelect image: UIImage?, location: CLLocation?, locationName: String?) {
         controller.dismiss(animated: true, completion: nil)
 
-        self.delegate?.didSelect(image: image)
+        self.delegate?.didSelect(image: image, location: location, locationName: locationName)
     }
 }
 
 extension ImagePicker: UIImagePickerControllerDelegate {
 
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        self.pickerController(picker, didSelect: nil)
+        self.pickerController(picker, didSelect: nil, location: nil, locationName: nil)
     }
 
     public func imagePickerController(_ picker: UIImagePickerController,
                                       didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         guard let image = info[.originalImage] as? UIImage else {
-            return self.pickerController(picker, didSelect: nil)
+            return self.pickerController(picker, didSelect: nil, location: nil, locationName: nil)
         }
         switch picker.sourceType {
         case .photoLibrary, .savedPhotosAlbum:
-                    print("1")
                     if let URL = info[UIImagePickerController.InfoKey(rawValue: UIImagePickerController.InfoKey.referenceURL.rawValue)] as? URL {
-//                        print("We got the URL as \(URL)")
                         let opts = PHFetchOptions()
                         opts.fetchLimit = 1
                         let assets = PHAsset.fetchAssets(withALAssetURLs: [URL], options: opts)
+                        
                         for assetIndex in 0..<assets.count {
                             let asset = assets[assetIndex]
-                            
-                            CLGeocoder().reverseGeocodeLocation(asset.location!, completionHandler: {(placemarks, error) -> Void in
-                                print(asset.location)
-                                
-                                if let error = error {
-                                    print("Reverse geocoder failed with error" + error.localizedDescription)
-                                    return
-                                }
-                                if placemarks != nil && placemarks!.count > 0 {
-                                    DispatchQueue.main.async {
-                                        print("Locality: \(placemarks![0].locality!)")
-                                    }
-                                } else {
-                                    print("Problem with the data received from geocoder")
-                                }
-                            })
+
+                            self.determineCity(location: asset.location!)
                         }
                     }
         case .camera:
             ALAssetsLibrary().writeImage(toSavedPhotosAlbum: image.cgImage!, metadata: info[UIImagePickerController.InfoKey.mediaMetadata]! as! [NSObject : AnyObject], completionBlock: { (url, error) -> Void in
-                                    print("2")
-                                    guard let URL = url else { return }
-//                                    print("photo saved to asset")
-//                                    print(url)
-                            
-                            let assetLibrary = ALAssetsLibrary()
-                                        assetLibrary.asset(for: url,
-                                                        resultBlock: { (asset) -> Void in
-                                                            if let asset = asset {
-                                                                print("Asset: \(asset.description)")
-                            //                                    print(asset.image)
-                            //                                    print(asset.location)
-                                                                let assetImage =  UIImage(cgImage:  asset.defaultRepresentation().fullResolutionImage().takeUnretainedValue())
-                                                                print("Asset image: \(assetImage.getExifData())")
-                                                            }
-                                                        }, failureBlock: { (error) -> Void in
-                                                            if let error = error { print(error.localizedDescription) }
-                                                    })
-                                            
-                                                
-                                //                 you can load your UIImage that was just saved to your asset as follow
-            //                        let assetLibrary = ALAssetsLibrary()
-            //                        assetLibrary.asset(for: url,
-            //                                        resultBlock: { (asset) -> Void in
-            //                                            if let asset = asset {
-            //                                                print(asset)
-            //            //                                    print(asset.image)
-            //            //                                    print(asset.location)
-            //                                                let assetImage =  UIImage(cgImage:  asset.defaultRepresentation().fullResolutionImage().takeUnretainedValue())
-            //                                                print(assetImage)
-            //                                            }
-            //                                        }, failureBlock: { (error) -> Void in
-            //                                            if let error = error { print(error.localizedDescription) }
-            //                                    })
-                            
-                            var currentLoc: CLLocation!
-                            if(CLLocationManager.authorizationStatus() == .authorizedWhenInUse ||
-                            CLLocationManager.authorizationStatus() == .authorizedAlways) {
-                                currentLoc = self.locationManager.location
-                               print(currentLoc.coordinate.latitude)
-                               print(currentLoc.coordinate.longitude)
-                            }
-                            
-                            
-                            
-                                    let opts = PHFetchOptions()
-                                    opts.fetchLimit = 1
-                                    let assets = PHAsset.fetchAssets(withALAssetURLs: [URL], options: opts)
-                                                for assetIndex in 0..<assets.count {
-                                                    let asset = assets[assetIndex]
-                                                    // print("Location: \(asset.location?.description) Taken: \(asset.creationDate)")
-                                    //                location = String(describing: asset.location!)
-                                    //                timeTaken = asset.creationDate!.description
-                                                    
-            //                                        CLGeocoder().reverseGeocodeLocation(asset.location!, completionHandler: {(placemarks, error) -> Void in
-            //                                            print(asset.location)
-            //
-            //                                            if let error = error {
-            //                                                print("Reverse geocoder failed with error" + error.localizedDescription)
-            //                                                return
-            //                                            }
-            //
-            //                                            if placemarks != nil && placemarks!.count > 0 {
-            //                                                DispatchQueue.main.async {
-            //                                                    print("Locality: \(placemarks![0].locality!)")
-            //                                                }
-            //
-            //                                            }
-            //                                            else {
-            //                                                print("Problem with the data received from geocoder")
-            //                                            }
-            //                                        })
-                                                }
-                                            })
+
+                guard let URL = url else { return }
+                var currentLoc: CLLocation!
+                if(CLLocationManager.authorizationStatus() == .authorizedWhenInUse ||
+                    CLLocationManager.authorizationStatus() == .authorizedAlways) {
+                    currentLoc = self.locationManager.location
+                    print(currentLoc.coordinate.latitude)
+                    print(currentLoc.coordinate.longitude)
+                    self.location = currentLoc
+                    self.determineCity(location: currentLoc)
+                }
+            })
         }
-        self.pickerController(picker, didSelect: image)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.pickerController(picker, didSelect: image, location: self.location, locationName: self.locationName)
+        }
+//        self.pickerController(picker, didSelect: image, location: location, locationName: locationName)
+    }
+    
+    func determineCity(location: CLLocation) {
+        CLGeocoder().reverseGeocodeLocation(location, completionHandler: {(placemarks, error) -> Void in //check here for asset.location nil
+
+            if let error = error {
+                print("Reverse geocoder failed with error" + error.localizedDescription)
+                return
+            }
+            if placemarks != nil && placemarks!.count > 0 {
+                    print("Locality: \(placemarks![0].locality!)")
+                    self.locationName = "\(placemarks?[0].locality!)"
+            } else {
+                print("Problem with the data received from geocoder")
+            }
+        })
     }
 }
 
