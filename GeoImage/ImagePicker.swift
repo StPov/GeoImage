@@ -92,41 +92,37 @@ extension ImagePicker: UIImagePickerControllerDelegate {
         }
         switch picker.sourceType {
         case .photoLibrary, .savedPhotosAlbum:
-                    if let URL = info[UIImagePickerController.InfoKey(rawValue: UIImagePickerController.InfoKey.referenceURL.rawValue)] as? URL {
-                        let opts = PHFetchOptions()
-                        opts.fetchLimit = 1
-                        let assets = PHAsset.fetchAssets(withALAssetURLs: [URL], options: opts)
-                        
-                        for assetIndex in 0..<assets.count {
-                            let asset = assets[assetIndex]
-                            guard let location = asset.location else {
-                                return self.pickerController(picker, didSelect: image, location: nil, locationName: "None")
-                            }
-                            self.determineCity(location: location) { (cityName) in
-                                self.pickerController(picker, didSelect: image, location: location, locationName: cityName)
-                            }
+            if (info[UIImagePickerController.InfoKey(rawValue: UIImagePickerController.InfoKey.imageURL.rawValue)] as? URL) != nil {
+                let opts = PHFetchOptions()
+                opts.fetchLimit = 1
+                let asset = info[UIImagePickerController.InfoKey.phAsset] as! PHAsset
+                guard let location = asset.location else {
+                    self.setCurrentLocationToImage(image: image) { (location) in
+                        guard let location = location else {
+                            return self.pickerController(picker, didSelect: image, location: nil, locationName: "None")
+                        }
+                        self.determineCity(location: location) { (cityName) in
+                            self.pickerController(picker, didSelect: image, location: location, locationName: cityName)
                         }
                     }
+                    return self.pickerController(picker, didSelect: image, location: nil, locationName: "None")
+                }
+                self.determineCity(location: location) { (cityName) in
+                    self.pickerController(picker, didSelect: image, location: location, locationName: cityName)
+                }
+            }
         case .camera:
-            ALAssetsLibrary().writeImage(toSavedPhotosAlbum: image.cgImage!, metadata: info[UIImagePickerController.InfoKey.mediaMetadata]! as! [NSObject : AnyObject], completionBlock: { (url, error) -> Void in
-
-                var currentLoc: CLLocation!
-                if(CLLocationManager.authorizationStatus() == .authorizedWhenInUse ||
-                    CLLocationManager.authorizationStatus() == .authorizedAlways) {
-                    currentLoc = self.locationManager.location
-                    guard let location = currentLoc else {
-                        return self.pickerController(picker, didSelect: image, location: nil, locationName: nil)
-                    }
-                    self.determineCity(location: location) { (cityName) in
-                        self.pickerController(picker, didSelect: image, location: location, locationName: cityName)
-                    }
+            setCurrentLocationToImage(image: image) { (location) in
+                guard let location = location else {
+                    return self.pickerController(picker, didSelect: image, location: nil, locationName: "None")
                 }
-                if(CLLocationManager.authorizationStatus() == .denied ||
-                    CLLocationManager.authorizationStatus() == .restricted ||
-                    CLLocationManager.authorizationStatus() == .notDetermined) {
-                    self.pickerController(picker, didSelect: image, location: nil, locationName: "None")
+                self.determineCity(location: location) { (cityName) in
+                    self.pickerController(picker, didSelect: image, location: location, locationName: cityName)
                 }
-            })
+            }
+            
+        @unknown default:
+            fatalError()
         }
     }
     
@@ -145,6 +141,18 @@ extension ImagePicker: UIImagePickerControllerDelegate {
             }
         })
     }
+    
+    func setCurrentLocationToImage(_ picker: UIImagePickerController = UIImagePickerController(), image: UIImage, completion: @escaping (_ location: CLLocation?) -> Void) {
+        var currentLoc: CLLocation!
+        if(CLLocationManager.authorizationStatus() == .authorizedWhenInUse ||
+            CLLocationManager.authorizationStatus() == .authorizedAlways) {
+            currentLoc = self.locationManager.location
+            completion(currentLoc)
+        } else {
+            completion(nil)
+        }
+    }
+
 }
 
 extension ImagePicker: UINavigationControllerDelegate {

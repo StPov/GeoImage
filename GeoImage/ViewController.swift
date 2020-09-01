@@ -32,7 +32,7 @@ class ViewController: UIViewController {
 extension ViewController: ImagePickerDelegate {
     func didSelect(image: UIImage?, location: CLLocation?, locationName: String?) {
         self.imageView.image = image
-        loc.text = "\(location)"
+        loc.text = "\(String(describing: location))"
         locName.text = locationName
     }
 }
