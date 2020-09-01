@@ -30,10 +30,6 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: ImagePickerDelegate {
-
-//    func didSelect(image: UIImage?) {
-//        self.imageView.image = image
-//    }
     func didSelect(image: UIImage?, location: CLLocation?, locationName: String?) {
         self.imageView.image = image
         loc.text = "\(location)"

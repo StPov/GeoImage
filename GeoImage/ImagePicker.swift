@@ -21,8 +21,6 @@ open class ImagePicker: NSObject {
     private weak var presentationController: UIViewController?
     private weak var delegate: ImagePickerDelegate?
     var locationManager = CLLocationManager()
-    var location: CLLocation?
-    var locationName: String?
 
     public init(presentationController: UIViewController, delegate: ImagePickerDelegate) {
         self.pickerController = UIImagePickerController()
@@ -101,41 +99,47 @@ extension ImagePicker: UIImagePickerControllerDelegate {
                         
                         for assetIndex in 0..<assets.count {
                             let asset = assets[assetIndex]
-
-                            self.determineCity(location: asset.location!)
+                            guard let location = asset.location else {
+                                return self.pickerController(picker, didSelect: image, location: nil, locationName: "None")
+                            }
+                            self.determineCity(location: location) { (cityName) in
+                                self.pickerController(picker, didSelect: image, location: location, locationName: cityName)
+                            }
                         }
                     }
         case .camera:
             ALAssetsLibrary().writeImage(toSavedPhotosAlbum: image.cgImage!, metadata: info[UIImagePickerController.InfoKey.mediaMetadata]! as! [NSObject : AnyObject], completionBlock: { (url, error) -> Void in
 
-                guard let URL = url else { return }
                 var currentLoc: CLLocation!
                 if(CLLocationManager.authorizationStatus() == .authorizedWhenInUse ||
                     CLLocationManager.authorizationStatus() == .authorizedAlways) {
                     currentLoc = self.locationManager.location
-                    print(currentLoc.coordinate.latitude)
-                    print(currentLoc.coordinate.longitude)
-                    self.location = currentLoc
-                    self.determineCity(location: currentLoc)
+                    guard let location = currentLoc else {
+                        return self.pickerController(picker, didSelect: image, location: nil, locationName: nil)
+                    }
+                    self.determineCity(location: location) { (cityName) in
+                        self.pickerController(picker, didSelect: image, location: location, locationName: cityName)
+                    }
+                }
+                if(CLLocationManager.authorizationStatus() == .denied ||
+                    CLLocationManager.authorizationStatus() == .restricted ||
+                    CLLocationManager.authorizationStatus() == .notDetermined) {
+                    self.pickerController(picker, didSelect: image, location: nil, locationName: "None")
                 }
             })
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.pickerController(picker, didSelect: image, location: self.location, locationName: self.locationName)
-        }
-//        self.pickerController(picker, didSelect: image, location: location, locationName: locationName)
     }
     
-    func determineCity(location: CLLocation) {
-        CLGeocoder().reverseGeocodeLocation(location, completionHandler: {(placemarks, error) -> Void in //check here for asset.location nil
+    func determineCity(location: CLLocation, completion: @escaping (_ city: String) -> Void) {
+        CLGeocoder().reverseGeocodeLocation(location, completionHandler: {(placemarks, error) -> Void in
 
             if let error = error {
                 print("Reverse geocoder failed with error" + error.localizedDescription)
                 return
             }
             if placemarks != nil && placemarks!.count > 0 {
-                    print("Locality: \(placemarks![0].locality!)")
-                    self.locationName = "\(placemarks?[0].locality!)"
+                guard let cityName = placemarks?[0].locality else { return }
+                completion(cityName)
             } else {
                 print("Problem with the data received from geocoder")
             }
